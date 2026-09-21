@@ -10,7 +10,7 @@ import {
 const AnecdoteList = () => {
   const anecdotes = useAnecdotes()
   const filter = useFilter()
-  const { vote } = useAnecdoteActions()
+  const { vote, remove } = useAnecdoteActions()
   const { show } = useNotificationActions()
   const visibleAnecdotes = sortByVotes(filterAnecdotes(anecdotes, filter))
 
@@ -27,6 +27,9 @@ const AnecdoteList = () => {
           <div>
             has {anecdote.votes}
             <button onClick={() => handleVote(anecdote)}>vote</button>
+            {anecdote.votes === 0 && (
+              <button onClick={() => remove(anecdote.id)}>delete</button>
+            )}
           </div>
         </div>
       ))}
