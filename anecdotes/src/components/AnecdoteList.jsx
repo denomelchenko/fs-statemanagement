@@ -1,12 +1,13 @@
-import { useAnecdoteActions, useAnecdotes } from '../store'
+import { sortByVotes, useAnecdoteActions, useAnecdotes } from '../store'
 
 const AnecdoteList = () => {
   const anecdotes = useAnecdotes()
   const { vote } = useAnecdoteActions()
+  const sortedAnecdotes = sortByVotes(anecdotes)
 
   return (
     <div>
-      {anecdotes.map((anecdote) => (
+      {sortedAnecdotes.map((anecdote) => (
         <div key={anecdote.id} data-testid="anecdote-item">
           <div>{anecdote.content}</div>
           <div>

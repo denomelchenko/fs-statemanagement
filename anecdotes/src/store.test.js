@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { useAnecdoteStore } from './store'
+import { sortByVotes, useAnecdoteStore } from './store'
 
 describe('anecdote store', () => {
   beforeEach(() => {
@@ -30,5 +30,26 @@ describe('anecdote store', () => {
       content: 'a brand new anecdote',
       votes: 0,
     })
+  })
+
+  it('sortByVotes orders anecdotes by descending votes without mutating its input', () => {
+    const anecdotes = [
+      { id: '1', content: 'one vote', votes: 1 },
+      { id: '2', content: 'five votes', votes: 5 },
+      { id: '3', content: 'three votes', votes: 3 },
+    ]
+
+    const sorted = sortByVotes(anecdotes)
+
+    expect(sorted.map((anecdote) => anecdote.content)).toEqual([
+      'five votes',
+      'three votes',
+      'one vote',
+    ])
+    expect(anecdotes.map((anecdote) => anecdote.content)).toEqual([
+      'one vote',
+      'five votes',
+      'three votes',
+    ])
   })
 })
