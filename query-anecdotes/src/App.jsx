@@ -22,8 +22,20 @@ const App = () => {
     },
   })
 
-  const handleVote = (anecdote) => {
-    console.log('vote', anecdote.id)
+  const voteMutation = useMutation({
+    mutationFn: (anecdote) =>
+      anecdoteService.update({ ...anecdote, votes: anecdote.votes + 1 }),
+    onSuccess: (votedAnecdote) => {
+      queryClient.setQueryData(['anecdotes'], (anecdotes) =>
+        anecdotes.map((anecdote) =>
+          anecdote.id === votedAnecdote.id ? votedAnecdote : anecdote
+        )
+      )
+    },
+  })
+
+  const vote = (anecdote) => {
+    voteMutation.mutate(anecdote)
   }
 
   if (isError) {
@@ -45,7 +57,7 @@ const App = () => {
             <div>{anecdote.content}</div>
             <div>
               has {anecdote.votes}
-              <button onClick={() => handleVote(anecdote)}>vote</button>
+              <button onClick={() => vote(anecdote)}>vote</button>
             </div>
           </div>
         ))
