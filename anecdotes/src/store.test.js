@@ -19,4 +19,16 @@ describe('anecdote store', () => {
       { id: '2', content: 'second anecdote', votes: 0 },
     ])
   })
+
+  it('creating an anecdote adds it to the store with zero votes', () => {
+    useAnecdoteStore.getState().actions.create('a brand new anecdote')
+
+    const anecdotes = useAnecdoteStore.getState().anecdotes
+    expect(anecdotes).toHaveLength(3)
+    expect(anecdotes[2]).toEqual({
+      id: expect.any(String),
+      content: 'a brand new anecdote',
+      votes: 0,
+    })
+  })
 })
