@@ -10,17 +10,28 @@ export const useAnecdoteStore = create((set, get) => ({
       set({ anecdotes })
     },
     vote: async (id) => {
-      const anecdote = get().anecdotes.find((item) => item.id === id)
-      if (!anecdote) {
-        return
-      }
-      const votedAnecdote = await anecdoteService.update({
-        ...anecdote,
-        votes: anecdote.votes + 1,
-      })
+      // Increment locally first: two rapid clicks then read 1 and 2, not 0 and 0.
+      // Doing it after the round trip loses a vote whenever a second click lands
+      // before the first response arrives.
       set((state) => ({
         anecdotes: state.anecdotes.map((item) =>
-          item.id === votedAnecdote.id ? votedAnecdote : item
+          item.id === id ? { ...item, votes: item.votes + 1 } : item
+        ),
+      }))
+
+      const votedAnecdote = get().anecdotes.find((item) => item.id === id)
+      if (!votedAnecdote) {
+        return
+      }
+
+      const savedAnecdote = await anecdoteService.update(votedAnecdote)
+
+      // Only take the server's answer if no further vote happened meanwhile.
+      set((state) => ({
+        anecdotes: state.anecdotes.map((item) =>
+          item.id === id && item.votes === votedAnecdote.votes
+            ? savedAnecdote
+            : item
         ),
       }))
     },

@@ -127,6 +127,37 @@ describe('anecdote store', () => {
     ])
   })
 
+  it('two votes that overlap in flight both reach the backend and the list', async () => {
+    useAnecdoteStore.setState({
+      anecdotes: [
+        { id: '1', content: 'popular anecdote', votes: 0 },
+        { id: '2', content: 'unaffected anecdote', votes: 5 },
+      ],
+    })
+    // A faithful stand-in for the JSON Server, which answers PUT with the body it stored.
+    anecdoteService.update.mockImplementation(async (anecdote) => anecdote)
+
+    const { result } = renderHook(() => useAnecdoteActions())
+
+    // Two rapid clicks do not wait for each other: both handlers run before either
+    // response arrives. The store must not lose the second vote by reading a stale count.
+    await act(async () => {
+      await Promise.all([result.current.vote('1'), result.current.vote('1')])
+    })
+
+    const anecdotes = useAnecdoteStore.getState().anecdotes
+    expect(anecdotes.find((anecdote) => anecdote.id === '1').votes).toBe(2)
+    expect(anecdotes.find((anecdote) => anecdote.id === '2').votes).toBe(5)
+    expect(anecdoteService.update).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ id: '1', votes: 1 })
+    )
+    expect(anecdoteService.update).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ id: '1', votes: 2 })
+    )
+  })
+
   it('voting repeatedly accumulates the votes of the chosen anecdote', async () => {
     useAnecdoteStore.setState({
       anecdotes: [
