@@ -1,14 +1,36 @@
-import { beforeEach, describe, expect, it } from 'vitest'
-import { filterAnecdotes, sortByVotes, useAnecdoteStore } from './store'
+import { act, cleanup, renderHook } from '@testing-library/react'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import anecdoteService from './services/anecdotes'
+import {
+  filterAnecdotes,
+  sortByVotes,
+  useAnecdoteActions,
+  useAnecdoteStore,
+} from './store'
+
+vi.mock('./services/anecdotes', () => ({
+  default: {
+    getAll: vi.fn(),
+    createNew: vi.fn(),
+    update: vi.fn(),
+    remove: vi.fn(),
+  },
+}))
 
 describe('anecdote store', () => {
   beforeEach(() => {
+    vi.clearAllMocks()
     useAnecdoteStore.setState({
       anecdotes: [
         { id: '1', content: 'first anecdote', votes: 0 },
         { id: '2', content: 'second anecdote', votes: 0 },
       ],
+      filter: '',
     })
+  })
+
+  afterEach(() => {
+    cleanup()
   })
 
   it('voting adds one vote to the anecdote with the given id', () => {
@@ -20,13 +42,23 @@ describe('anecdote store', () => {
     ])
   })
 
-  it('creating an anecdote adds it to the store with zero votes', () => {
-    useAnecdoteStore.getState().actions.create('a brand new anecdote')
+  it('creating an anecdote adds the anecdote the backend created', async () => {
+    anecdoteService.createNew.mockResolvedValue({
+      id: '3',
+      content: 'a brand new anecdote',
+      votes: 0,
+    })
+
+    const { result } = renderHook(() => useAnecdoteActions())
+
+    await act(async () => {
+      await result.current.create('a brand new anecdote')
+    })
 
     const anecdotes = useAnecdoteStore.getState().anecdotes
     expect(anecdotes).toHaveLength(3)
     expect(anecdotes[2]).toEqual({
-      id: expect.any(String),
+      id: '3',
       content: 'a brand new anecdote',
       votes: 0,
     })

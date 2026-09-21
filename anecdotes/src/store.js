@@ -15,14 +15,10 @@ export const useAnecdoteStore = create((set) => ({
           anecdote.id === id ? { ...anecdote, votes: anecdote.votes + 1 } : anecdote
         ),
       })),
-    create: (content) =>
-      set((state) => ({
-        anecdotes: state.anecdotes.concat({
-          content,
-          id: (100000 * Math.random()).toFixed(0),
-          votes: 0,
-        }),
-      })),
+    create: async (content) => {
+      const newAnecdote = await anecdoteService.createNew(content)
+      set((state) => ({ anecdotes: state.anecdotes.concat(newAnecdote) }))
+    },
     setFilter: (filter) => set({ filter }),
   },
 }))
