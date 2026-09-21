@@ -126,4 +126,29 @@ describe('anecdote store', () => {
       'Untested code is broken code',
     ])
   })
+
+  it('voting repeatedly accumulates the votes of the chosen anecdote', async () => {
+    useAnecdoteStore.setState({
+      anecdotes: [
+        { id: '1', content: 'popular anecdote', votes: 0 },
+        { id: '2', content: 'unaffected anecdote', votes: 5 },
+      ],
+    })
+    anecdoteService.update
+      .mockResolvedValueOnce({ id: '1', content: 'popular anecdote', votes: 1 })
+      .mockResolvedValueOnce({ id: '1', content: 'popular anecdote', votes: 2 })
+
+    const { result } = renderHook(() => useAnecdoteActions())
+
+    await act(async () => {
+      await result.current.vote('1')
+    })
+    await act(async () => {
+      await result.current.vote('1')
+    })
+
+    const anecdotes = useAnecdoteStore.getState().anecdotes
+    expect(anecdotes.find((anecdote) => anecdote.id === '1').votes).toBe(2)
+    expect(anecdotes.find((anecdote) => anecdote.id === '2').votes).toBe(5)
+  })
 })
