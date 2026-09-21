@@ -1,3 +1,4 @@
+import { useNotificationActions } from '../notificationStore'
 import {
   filterAnecdotes,
   sortByVotes,
@@ -10,7 +11,13 @@ const AnecdoteList = () => {
   const anecdotes = useAnecdotes()
   const filter = useFilter()
   const { vote } = useAnecdoteActions()
+  const { show } = useNotificationActions()
   const visibleAnecdotes = sortByVotes(filterAnecdotes(anecdotes, filter))
+
+  const handleVote = async (anecdote) => {
+    await vote(anecdote.id)
+    show(`you voted '${anecdote.content}'`)
+  }
 
   return (
     <div>
@@ -19,7 +26,7 @@ const AnecdoteList = () => {
           <div>{anecdote.content}</div>
           <div>
             has {anecdote.votes}
-            <button onClick={() => vote(anecdote.id)}>vote</button>
+            <button onClick={() => handleVote(anecdote)}>vote</button>
           </div>
         </div>
       ))}
