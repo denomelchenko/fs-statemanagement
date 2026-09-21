@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import anecdoteService from '../services/anecdotes'
 
-export const useAnecdotes = () => {
+export const useAnecdotes = ({ notify }) => {
   const queryClient = useQueryClient()
 
   const {
@@ -15,8 +15,9 @@ export const useAnecdotes = () => {
 
   const addAnecdoteMutation = useMutation({
     mutationFn: anecdoteService.createNew,
-    onSuccess: () => {
+    onSuccess: (newAnecdote) => {
       queryClient.invalidateQueries({ queryKey: ['anecdotes'] })
+      notify(`anecdote '${newAnecdote.content}' created`)
     },
   })
 
@@ -29,6 +30,7 @@ export const useAnecdotes = () => {
           anecdote.id === votedAnecdote.id ? votedAnecdote : anecdote
         )
       )
+      notify(`anecdote '${votedAnecdote.content}' voted`)
     },
   })
 
