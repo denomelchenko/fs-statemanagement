@@ -47,4 +47,25 @@ describe('<AnecdoteList />', () => {
       'one vote',
     ])
   })
+
+  it('renders only the anecdotes that match the filter, still sorted by votes', async () => {
+    anecdoteService.getAll.mockResolvedValue([
+      { id: '1', content: 'Real artists ship code', votes: 7 },
+      { id: '2', content: 'Simplicity is the ultimate sophistication', votes: 5 },
+      { id: '3', content: 'Untested code is broken code', votes: 3 },
+    ])
+
+    await act(async () => {
+      await useAnecdoteStore.getState().actions.initialize()
+    })
+
+    useAnecdoteStore.setState({ filter: 'code' })
+
+    const { container } = render(<AnecdoteList />)
+
+    expect(renderedContents(container)).toEqual([
+      'Real artists ship code',
+      'Untested code is broken code',
+    ])
+  })
 })
