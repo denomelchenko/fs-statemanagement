@@ -19,6 +19,9 @@ export const useAnecdotes = ({ notify }) => {
       queryClient.invalidateQueries({ queryKey: ['anecdotes'] })
       notify(`anecdote '${newAnecdote.content}' created`)
     },
+    onError: (error) => {
+      notify(error.message)
+    },
   })
 
   const voteMutation = useMutation({
