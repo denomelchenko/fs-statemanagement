@@ -2,7 +2,7 @@ name: Anecdotes tests
 
 on:
   push:
-    branches: [xmain]
+    branches: [main]
 
 jobs:
   playwright-tests:
@@ -14,21 +14,24 @@ jobs:
         with:
           node-version: 24
 
+      - name: Activate pnpm through Corepack
+        run: corepack prepare pnpm@12.5.1 --activate
+
       - name: Install anecdotes dependencies
         working-directory: anecdotes
-        run: npm ci
+        run: corepack pnpm install --frozen-lockfile
 
       - name: Install test dependencies
         working-directory: anecdotes-tests
-        run: npm ci
+        run: corepack pnpm install --frozen-lockfile
 
       - name: Install Playwright browsers
         working-directory: anecdotes-tests
-        run: npx playwright install --with-deps chromium
+        run: corepack pnpm exec playwright install --with-deps chromium
 
       - name: Run Playwright tests
         working-directory: anecdotes-tests
-        run: npx playwright test
+        run: corepack pnpm test
 
       - name: Upload Playwright report
         if: ${{ !cancelled() }}

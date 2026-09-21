@@ -2,7 +2,7 @@ name: Anecdotes tests check
 
 on:
   push:
-    branches: [xmain]
+    branches: [main]
 
 jobs:
   unit-tests:
@@ -14,9 +14,12 @@ jobs:
         with:
           node-version: 24
 
+      - name: Activate pnpm through Corepack
+        run: corepack prepare pnpm@12.5.1 --activate
+
       - name: Install anecdotes dependencies
         working-directory: anecdotes
-        run: npm ci
+        run: corepack pnpm install --frozen-lockfile
 
       - name: Verify test files exist
         working-directory: anecdotes-tests
@@ -28,7 +31,7 @@ jobs:
 
       - name: Run unit tests
         working-directory: anecdotes
-        run: npm test
+        run: corepack pnpm test
 
       - name: Verify unit tests fail against a broken store
         working-directory: anecdotes-tests
