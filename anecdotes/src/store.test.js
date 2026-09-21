@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { sortByVotes, useAnecdoteStore } from './store'
+import { filterAnecdotes, sortByVotes, useAnecdoteStore } from './store'
 
 describe('anecdote store', () => {
   beforeEach(() => {
@@ -50,6 +50,21 @@ describe('anecdote store', () => {
       'one vote',
       'five votes',
       'three votes',
+    ])
+  })
+
+  it('filterAnecdotes keeps only the anecdotes containing the filter text', () => {
+    const anecdotes = [
+      { id: '1', content: 'Real artists ship code', votes: 7 },
+      { id: '2', content: 'Simplicity is the ultimate sophistication', votes: 5 },
+      { id: '3', content: 'Untested code is broken code', votes: 3 },
+    ]
+
+    const filtered = filterAnecdotes(anecdotes, 'code')
+
+    expect(filtered.map((anecdote) => anecdote.content)).toEqual([
+      'Real artists ship code',
+      'Untested code is broken code',
     ])
   })
 })
